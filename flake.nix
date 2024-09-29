@@ -24,10 +24,12 @@
                   ];
                 }
               )
+              rust-analyzer
               cargo-generate
               ldproxy
               espup
               espflash
+              python3
               cargo-espflash
 
               minicom

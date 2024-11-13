@@ -1,52 +1,48 @@
-//! Blinks an LED
-//!
-//! This assumes that a LED is connected to pc13 as is the case on the blue pill board.
-//!
-//! Note: Without additional hardware, PC13 should not be used to drive an LED, see page 5.1.2 of
-//! the reference manual for an explanation. This is not an issue on the blue pill.
+//! Set single PWM pin to 30kHz on Blue Pill
 
 #![deny(unsafe_code)]
-#![no_std]
 #![no_main]
-
-use panic_halt as _;
-
-use nb::block;
+#![no_std]
 
 use cortex_m_rt::entry;
-use stm32f1xx_hal::{pac, prelude::*, timer::Timer};
+use panic_halt as _;
+use stm32f1xx_hal::{
+    pac,
+    prelude::*,
+    timer::{Channel, Tim2NoRemap},
+};
 
 #[entry]
 fn main() -> ! {
-    // Get access to the core peripherals from the cortex-m crate
-    let cp = cortex_m::Peripherals::take().unwrap();
-    // Get access to the device specific peripherals from the peripheral access crate
     let dp = pac::Peripherals::take().unwrap();
 
-    // Take ownership over the raw flash and rcc devices and convert them into the corresponding
-    // HAL structs
     let mut flash = dp.FLASH.constrain();
     let rcc = dp.RCC.constrain();
 
-    // Freeze the configuration of all the clocks in the system and store the frozen frequencies in
-    // `clocks`
     let clocks = rcc.cfgr.freeze(&mut flash.acr);
 
-    // Acquire the GPIOC peripheral
-    let mut gpioc = dp.GPIOC.split();
+    let mut afio = dp.AFIO.constrain();
+    let mut gpioa = dp.GPIOA.split();
 
-    // Configure gpio C pin 13 as a push-pull output. The `crh` register is passed to the function
-    // in order to configure the port. For pins 0-7, crl should be passed instead.
-    let mut led = gpioc.pc13.into_push_pull_output(&mut gpioc.crh);
-    // Configure the syst timer to trigger an update every second
-    let mut timer = Timer::syst(cp.SYST, &clocks).counter_hz();
-    timer.start(1.Hz()).unwrap();
+    // Set up PA0 for PWM output
+    let pa0 = gpioa.pa0.into_alternate_push_pull(&mut gpioa.crl);
 
-    // Wait for the timer to trigger an update and change the state of the LED
+    // Initialize PWM on TIM2 for 30kHz
+    let mut pwm = dp.TIM2.pwm_hz::<Tim2NoRemap, _, _>(
+        pa0, // Only using PA0 on Channel 1
+        &mut afio.mapr,
+        30.kHz(), // Set frequency to 30kHz
+        &clocks,
+    );
+
+    // Enable the PWM output on Channel 1
+    pwm.enable(Channel::C1);
+
+    // Set duty cycle to 50% for demonstration
+    let max_duty = pwm.get_max_duty();
+    pwm.set_duty(Channel::C1, max_duty / 2);
+
     loop {
-        block!(timer.wait()).unwrap();
-        led.set_high();
-        block!(timer.wait()).unwrap();
-        led.set_low();
+        // PWM signal will continue as set above
     }
 }

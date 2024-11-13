@@ -4,34 +4,32 @@
     rust-overlay.url = "github:oxalica/rust-overlay";
   };
 
-  outputs = { nixpkgs, flake-utils, rust-overlay, ... }:
-    flake-utils.lib.eachSystem [ "x86_64-linux" ] (
-      system:
-      let
+  outputs = {
+    nixpkgs,
+    flake-utils,
+    rust-overlay,
+    ...
+  }:
+    flake-utils.lib.eachSystem ["x86_64-linux"] (
+      system: let
         pkgs = import nixpkgs {
           inherit system;
-          overlays = [ rust-overlay.overlays.default ];
+          overlays = [rust-overlay.overlays.default];
         };
-      in
-      {
-        devShell = pkgs.mkShell
+      in {
+        devShell =
+          pkgs.mkShell
           {
             nativeBuildInputs = with pkgs; [
               (
                 rust-bin.stable.latest.default.override {
-                  targets = [
-                    "riscv32imc-unknown-none-elf"
-                  ];
+                  # ARM Cortex-M3
+                  targets = ["thumbv7m-none-eabi"];
                 }
               )
+              gcc-arm-embedded
+              probe-rs
               rust-analyzer
-              cargo-generate
-              ldproxy
-              espup
-              espflash
-              python3
-              cargo-espflash
-
               minicom
             ];
           };

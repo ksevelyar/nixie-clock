@@ -1,0 +1,9 @@
+# compiled files and executables
+debug/
+target/
+.direnv
+
+
+# Added by cargo
+
+/target

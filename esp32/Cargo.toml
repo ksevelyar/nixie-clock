@@ -15,6 +15,8 @@ esp-backtrace = { version = "0.14.2", features = [
 esp-hal = { version = "0.21.0", features = [ "esp32c3" ] }
 esp-println = { version = "0.12.0", features = ["esp32c3", "log"] }
 log = { version = "0.4.22" }
+# rda5807m = "0.1.0"
+rda5807m = { path = "rda5807m" }
 
 [profile.dev]
 # Rust debug is too slow.

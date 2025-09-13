@@ -60,10 +60,14 @@ fn display_digit(
         digit & 0b1000 != 0,
     ];
 
-    a.set_level(if bcd[0] { Level::High } else { Level::Low }).unwrap();
-    b.set_level(if bcd[1] { Level::High } else { Level::Low }).unwrap();
-    c.set_level(if bcd[2] { Level::High } else { Level::Low }).unwrap();
-    d.set_level(if bcd[3] { Level::High } else { Level::Low }).unwrap();
+    a.set_level(if bcd[0] { Level::High } else { Level::Low })
+        .unwrap();
+    b.set_level(if bcd[1] { Level::High } else { Level::Low })
+        .unwrap();
+    c.set_level(if bcd[2] { Level::High } else { Level::Low })
+        .unwrap();
+    d.set_level(if bcd[3] { Level::High } else { Level::Low })
+        .unwrap();
 }
 
 fn wifi_create(

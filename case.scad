@@ -3,15 +3,17 @@ board_width = 60;
 height = 2;
 tube_diameter = 25;
 
-regulator_length = 25.3;
-regulator_width = 30.3;
+regulator_length = 26.2;
+regulator_width = 31.2;
 
 wall = 1;
 
 enclosure_width = board_width;
 enclosure_length = enclosure_width * 2;
 enclosure_height = board_width;
-enclosure_leg_height = 20 - wall * 2;
+enclosure_leg_height = 20;
+regulator_leg_height = 2;
+board_leg_height = regulator_leg_height + 13;
 
 module leg(leg_height = 8) {
   difference() {
@@ -24,10 +26,11 @@ module leg(leg_height = 8) {
 module board() {
   // color("#4f7270") cube([ board_width, board_length, height ]);
 
-  translate([ 3, 3, 0 ]) color("#b1a531") leg();
-  translate([ board_width - 3, 3, 0 ]) color("#b1a531") leg();
-  translate([ board_width - 3, board_length - 3, 0 ]) color("#b1a531") leg();
-  translate([ 3, board_length - 3, 0 ]) color("#b1a531") leg();
+  translate([ 3, 3, 0 ]) color("#b1a531") leg(board_leg_height);
+  translate([ board_width - 3, 3, 0 ]) color("#b1a531") leg(board_leg_height);
+  translate([ board_width - 3, board_length - 3, 0 ]) color("#b1a531")
+      leg(board_leg_height);
+  translate([ 3, board_length - 3, 0 ]) color("#b1a531") leg(board_leg_height);
 }
 
 module tube() {
@@ -46,12 +49,12 @@ module tubes() {
 
 module regulator() {
   difference() {
-    cube([ regulator_width + wall * 2, regulator_length + wall * 2, 4.2 ]);
+    cube([ regulator_width + wall * 2, regulator_length + wall * 2, 4.5 ]);
     translate([ wall, wall, -1 ])
         cube([ regulator_width, regulator_length, 20 ]);
   }
   translate([ wall + regulator_width - 3, regulator_length - 3 + wall, -0.1 ])
-      color("#b1a531") leg(3);
+      color("#b1a531") leg(regulator_leg_height);
 }
 
 module rounded_box(size = [ 10, 10, 5 ], r = 3) {

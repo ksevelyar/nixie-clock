@@ -43,6 +43,7 @@
 
               esp-idf-esp32c3
             ];
+
             LD_LIBRARY_PATH = "${pkgs.lib.makeLibraryPath buildInputs}";
           };
       }

@@ -4,8 +4,8 @@ use esp_idf_svc::sntp;
 use esp_idf_svc::sys::EspError;
 use log::info;
 
-use esp_idf_svc::{eventloop::EspSystemEventLoop, hal::peripheral};
 use esp_idf_svc::nvs::*;
+use esp_idf_svc::{eventloop::EspSystemEventLoop, hal::peripheral};
 
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
@@ -60,13 +60,7 @@ fn main() -> Result<(), EspError> {
         }
 
         for (i, &digit) in last_digits.iter().enumerate() {
-            select_lamp(
-                i,
-                &mut lamp4,
-                &mut lamp5,
-                &mut lamp6,
-                &mut lamp7,
-            );
+            select_lamp(i, &mut lamp4, &mut lamp5, &mut lamp6, &mut lamp7);
             display_digit(&mut pin_a, &mut pin_b, &mut pin_c, &mut pin_d, digit);
             std::thread::sleep(Duration::from_millis(2));
         }
@@ -80,10 +74,18 @@ fn select_lamp(
     lamp6: &mut PinDriver<'_, esp_idf_svc::hal::gpio::Gpio6, esp_idf_svc::hal::gpio::Output>,
     lamp7: &mut PinDriver<'_, esp_idf_svc::hal::gpio::Gpio7, esp_idf_svc::hal::gpio::Output>,
 ) {
-    lamp4.set_level(if idx == 0 { Level::High } else { Level::Low }).unwrap();
-    lamp5.set_level(if idx == 1 { Level::High } else { Level::Low }).unwrap();
-    lamp6.set_level(if idx == 2 { Level::High } else { Level::Low }).unwrap();
-    lamp7.set_level(if idx == 3 { Level::High } else { Level::Low }).unwrap();
+    lamp4
+        .set_level(if idx == 0 { Level::High } else { Level::Low })
+        .unwrap();
+    lamp5
+        .set_level(if idx == 1 { Level::High } else { Level::Low })
+        .unwrap();
+    lamp6
+        .set_level(if idx == 2 { Level::High } else { Level::Low })
+        .unwrap();
+    lamp7
+        .set_level(if idx == 3 { Level::High } else { Level::Low })
+        .unwrap();
 }
 
 fn display_digit(
@@ -100,10 +102,14 @@ fn display_digit(
         digit & 0b1000 != 0,
     ];
 
-    a.set_level(if bcd[0] { Level::High } else { Level::Low }).unwrap();
-    b.set_level(if bcd[1] { Level::High } else { Level::Low }).unwrap();
-    c.set_level(if bcd[2] { Level::High } else { Level::Low }).unwrap();
-    d.set_level(if bcd[3] { Level::High } else { Level::Low }).unwrap();
+    a.set_level(if bcd[0] { Level::High } else { Level::Low })
+        .unwrap();
+    b.set_level(if bcd[1] { Level::High } else { Level::Low })
+        .unwrap();
+    c.set_level(if bcd[2] { Level::High } else { Level::Low })
+        .unwrap();
+    d.set_level(if bcd[3] { Level::High } else { Level::Low })
+        .unwrap();
 }
 
 fn wifi_create(

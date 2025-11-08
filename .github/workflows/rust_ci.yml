@@ -3,7 +3,7 @@ name: Continuous Integration
 on:
   push:
     paths-ignore:
-      - "**/README.md"
+      - "**/readme.md"
   pull_request:
   workflow_dispatch:
 
@@ -15,6 +15,7 @@ jobs:
   rust-checks:
     name: Rust Checks
     runs-on: ubuntu-latest
+    environment: ci
     strategy:
       fail-fast: false
       matrix:
@@ -39,3 +40,6 @@ jobs:
         run: cargo install ldproxy
       - name: Run command
         run: cargo ${{ matrix.action.command }} ${{ matrix.action.args }}
+        env:
+          SSID: ${{ secrets.SSID }}
+          PASS: ${{ secrets.PASS }}

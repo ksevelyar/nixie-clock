@@ -1,3 +1,4 @@
+use esp_idf_svc::hal::delay::FreeRtos;
 use esp_idf_svc::hal::gpio::{Level, PinDriver};
 use esp_idf_svc::hal::prelude::Peripherals;
 use esp_idf_svc::sntp;
@@ -7,10 +8,15 @@ use log::info;
 use esp_idf_svc::nvs::*;
 use esp_idf_svc::{eventloop::EspSystemEventLoop, hal::peripheral};
 
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::Duration;
 
 const SSID: &str = env!("SSID");
 const PASSWORD: &str = env!("PASS");
+
+fn busy_delay_us(us: u32) {
+    std::thread::sleep(Duration::from_micros(us as u64));
+}
 
 fn main() -> Result<(), EspError> {
     esp_idf_svc::sys::link_patches();
@@ -32,12 +38,12 @@ fn main() -> Result<(), EspError> {
     let mut pin_c = PinDriver::output(peripherals.pins.gpio2)?;
     let mut pin_d = PinDriver::output(peripherals.pins.gpio3)?;
 
-    let mut lamp4 = PinDriver::output(peripherals.pins.gpio4)?;
-    let mut lamp5 = PinDriver::output(peripherals.pins.gpio5)?;
-    let mut lamp6 = PinDriver::output(peripherals.pins.gpio6)?;
-    let mut lamp7 = PinDriver::output(peripherals.pins.gpio7)?;
+    let mut lamp0 = PinDriver::output(peripherals.pins.gpio4)?;
+    let mut lamp1 = PinDriver::output(peripherals.pins.gpio5)?;
+    let mut lamp2 = PinDriver::output(peripherals.pins.gpio6)?;
+    let mut lamp3 = PinDriver::output(peripherals.pins.gpio7)?;
 
-    let mut last_digits = [0u8; 4];
+    let mut digits = [0u8; 4];
     let mut last_update = 0u64;
 
     loop {
@@ -45,11 +51,12 @@ fn main() -> Result<(), EspError> {
         let seconds = now.as_secs();
 
         if seconds != last_update {
-            let total_minutes = seconds / 60;
+            let timezone = 3 * 60;
+            let total_minutes = seconds / 60 + timezone;
             let hours = (total_minutes / 60) % 24;
             let minutes = total_minutes % 60;
 
-            last_digits = [
+            digits = [
                 (hours / 10) as u8,
                 (hours % 10) as u8,
                 (minutes / 10) as u8,
@@ -59,33 +66,72 @@ fn main() -> Result<(), EspError> {
             last_update = seconds;
         }
 
-        for (i, &digit) in last_digits.iter().enumerate() {
-            select_lamp(i, &mut lamp4, &mut lamp5, &mut lamp6, &mut lamp7);
-            display_digit(&mut pin_a, &mut pin_b, &mut pin_c, &mut pin_d, digit);
-            std::thread::sleep(Duration::from_millis(2));
-        }
+        draw_frame(
+            &digits,
+            &mut pin_a,
+            &mut pin_b,
+            &mut pin_c,
+            &mut pin_d,
+            &mut lamp0,
+            &mut lamp1,
+            &mut lamp2,
+            &mut lamp3,
+        )?;
     }
+}
+
+fn draw_frame(
+    digits: &[u8; 4],
+    pin_a: &mut PinDriver<'_, esp_idf_svc::hal::gpio::Gpio0, esp_idf_svc::hal::gpio::Output>,
+    pin_b: &mut PinDriver<'_, esp_idf_svc::hal::gpio::Gpio1, esp_idf_svc::hal::gpio::Output>,
+    pin_c: &mut PinDriver<'_, esp_idf_svc::hal::gpio::Gpio2, esp_idf_svc::hal::gpio::Output>,
+    pin_d: &mut PinDriver<'_, esp_idf_svc::hal::gpio::Gpio3, esp_idf_svc::hal::gpio::Output>,
+    lamp0: &mut PinDriver<'_, esp_idf_svc::hal::gpio::Gpio4, esp_idf_svc::hal::gpio::Output>,
+    lamp1: &mut PinDriver<'_, esp_idf_svc::hal::gpio::Gpio5, esp_idf_svc::hal::gpio::Output>,
+    lamp2: &mut PinDriver<'_, esp_idf_svc::hal::gpio::Gpio6, esp_idf_svc::hal::gpio::Output>,
+    lamp3: &mut PinDriver<'_, esp_idf_svc::hal::gpio::Gpio7, esp_idf_svc::hal::gpio::Output>,
+) -> Result<(), EspError> {
+    for (i, &digit) in digits.iter().enumerate() {
+        set_all_lamps(Level::Low, lamp0, lamp1, lamp2, lamp3)?;
+        busy_delay_us(500);
+
+        display_digit(pin_a, pin_b, pin_c, pin_d, digit)?;
+
+        select_lamp(i, lamp0, lamp1, lamp2, lamp3)?;
+        busy_delay_us(1000);
+    }
+
+    FreeRtos::delay_ms(1);
+    Ok(())
+}
+
+fn set_all_lamps(
+    level: Level,
+    lamp0: &mut PinDriver<'_, esp_idf_svc::hal::gpio::Gpio4, esp_idf_svc::hal::gpio::Output>,
+    lamp1: &mut PinDriver<'_, esp_idf_svc::hal::gpio::Gpio5, esp_idf_svc::hal::gpio::Output>,
+    lamp2: &mut PinDriver<'_, esp_idf_svc::hal::gpio::Gpio6, esp_idf_svc::hal::gpio::Output>,
+    lamp3: &mut PinDriver<'_, esp_idf_svc::hal::gpio::Gpio7, esp_idf_svc::hal::gpio::Output>,
+) -> Result<(), EspError> {
+    lamp0.set_level(level)?;
+    lamp1.set_level(level)?;
+    lamp2.set_level(level)?;
+    lamp3.set_level(level)?;
+    Ok(())
 }
 
 fn select_lamp(
     idx: usize,
-    lamp4: &mut PinDriver<'_, esp_idf_svc::hal::gpio::Gpio4, esp_idf_svc::hal::gpio::Output>,
-    lamp5: &mut PinDriver<'_, esp_idf_svc::hal::gpio::Gpio5, esp_idf_svc::hal::gpio::Output>,
-    lamp6: &mut PinDriver<'_, esp_idf_svc::hal::gpio::Gpio6, esp_idf_svc::hal::gpio::Output>,
-    lamp7: &mut PinDriver<'_, esp_idf_svc::hal::gpio::Gpio7, esp_idf_svc::hal::gpio::Output>,
-) {
-    lamp4
-        .set_level(if idx == 0 { Level::High } else { Level::Low })
-        .unwrap();
-    lamp5
-        .set_level(if idx == 1 { Level::High } else { Level::Low })
-        .unwrap();
-    lamp6
-        .set_level(if idx == 2 { Level::High } else { Level::Low })
-        .unwrap();
-    lamp7
-        .set_level(if idx == 3 { Level::High } else { Level::Low })
-        .unwrap();
+    lamp0: &mut PinDriver<'_, esp_idf_svc::hal::gpio::Gpio4, esp_idf_svc::hal::gpio::Output>,
+    lamp1: &mut PinDriver<'_, esp_idf_svc::hal::gpio::Gpio5, esp_idf_svc::hal::gpio::Output>,
+    lamp2: &mut PinDriver<'_, esp_idf_svc::hal::gpio::Gpio6, esp_idf_svc::hal::gpio::Output>,
+    lamp3: &mut PinDriver<'_, esp_idf_svc::hal::gpio::Gpio7, esp_idf_svc::hal::gpio::Output>,
+) -> Result<(), EspError> {
+    lamp3.set_level(if idx == 0 { Level::High } else { Level::Low })?;
+    lamp2.set_level(if idx == 1 { Level::High } else { Level::Low })?;
+    lamp1.set_level(if idx == 2 { Level::High } else { Level::Low })?;
+    lamp0.set_level(if idx == 3 { Level::High } else { Level::Low })?;
+
+    Ok(())
 }
 
 fn display_digit(
@@ -94,7 +140,7 @@ fn display_digit(
     c: &mut PinDriver<'_, esp_idf_svc::hal::gpio::Gpio2, esp_idf_svc::hal::gpio::Output>,
     d: &mut PinDriver<'_, esp_idf_svc::hal::gpio::Gpio3, esp_idf_svc::hal::gpio::Output>,
     digit: u8,
-) {
+) -> Result<(), EspError> {
     let bcd = [
         digit & 0b0001 != 0,
         digit & 0b0010 != 0,
@@ -102,14 +148,12 @@ fn display_digit(
         digit & 0b1000 != 0,
     ];
 
-    a.set_level(if bcd[0] { Level::High } else { Level::Low })
-        .unwrap();
-    b.set_level(if bcd[1] { Level::High } else { Level::Low })
-        .unwrap();
-    c.set_level(if bcd[2] { Level::High } else { Level::Low })
-        .unwrap();
-    d.set_level(if bcd[3] { Level::High } else { Level::Low })
-        .unwrap();
+    a.set_level(if bcd[0] { Level::High } else { Level::Low })?;
+    b.set_level(if bcd[1] { Level::High } else { Level::Low })?;
+    c.set_level(if bcd[2] { Level::High } else { Level::Low })?;
+    d.set_level(if bcd[3] { Level::High } else { Level::Low })?;
+
+    Ok(())
 }
 
 fn wifi_create(

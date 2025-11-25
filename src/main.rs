@@ -1,4 +1,4 @@
-use esp_idf_svc::hal::delay::FreeRtos;
+use esp_idf_svc::hal::delay::{Ets, FreeRtos};
 use esp_idf_svc::hal::gpio::{Level, PinDriver};
 use esp_idf_svc::hal::prelude::Peripherals;
 use esp_idf_svc::sntp;
@@ -9,14 +9,9 @@ use esp_idf_svc::nvs::*;
 use esp_idf_svc::{eventloop::EspSystemEventLoop, hal::peripheral};
 
 use std::time::{SystemTime, UNIX_EPOCH};
-use std::time::Duration;
 
 const SSID: &str = env!("SSID");
 const PASSWORD: &str = env!("PASS");
-
-fn busy_delay_us(us: u32) {
-    std::thread::sleep(Duration::from_micros(us as u64));
-}
 
 fn main() -> Result<(), EspError> {
     esp_idf_svc::sys::link_patches();
@@ -43,66 +38,49 @@ fn main() -> Result<(), EspError> {
     let mut lamp2 = PinDriver::output(peripherals.pins.gpio6)?;
     let mut lamp3 = PinDriver::output(peripherals.pins.gpio7)?;
 
+    set_all_lamps(Level::Low, &mut lamp0, &mut lamp1, &mut lamp2, &mut lamp3)?;
+    display_digit(&mut pin_a, &mut pin_b, &mut pin_c, &mut pin_d, 0)?;
+
     let mut digits = [0u8; 4];
     let mut last_update = 0u64;
 
     loop {
-        let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
-        let seconds = now.as_secs();
+        maybe_update_state(&mut last_update, &mut digits);
 
-        if seconds != last_update {
-            let timezone = 3 * 60;
-            let total_minutes = seconds / 60 + timezone;
-            let hours = (total_minutes / 60) % 24;
-            let minutes = total_minutes % 60;
+        for (i, &digit) in digits.iter().enumerate() {
+            set_all_lamps(Level::Low, &mut lamp0, &mut lamp1, &mut lamp2, &mut lamp3)?;
+            Ets::delay_us(500);
 
-            digits = [
-                (hours / 10) as u8,
-                (hours % 10) as u8,
-                (minutes / 10) as u8,
-                (minutes % 10) as u8,
-            ];
+            display_digit(&mut pin_a, &mut pin_b, &mut pin_c, &mut pin_d, digit)?;
+            select_lamp(i, &mut lamp0, &mut lamp1, &mut lamp2, &mut lamp3)?;
+            Ets::delay_us(1500);
 
-            last_update = seconds;
+            set_all_lamps(Level::Low, &mut lamp0, &mut lamp1, &mut lamp2, &mut lamp3)?;
         }
 
-        draw_frame(
-            &digits,
-            &mut pin_a,
-            &mut pin_b,
-            &mut pin_c,
-            &mut pin_d,
-            &mut lamp0,
-            &mut lamp1,
-            &mut lamp2,
-            &mut lamp3,
-        )?;
+        FreeRtos::delay_ms(1);
     }
 }
 
-fn draw_frame(
-    digits: &[u8; 4],
-    pin_a: &mut PinDriver<'_, esp_idf_svc::hal::gpio::Gpio0, esp_idf_svc::hal::gpio::Output>,
-    pin_b: &mut PinDriver<'_, esp_idf_svc::hal::gpio::Gpio1, esp_idf_svc::hal::gpio::Output>,
-    pin_c: &mut PinDriver<'_, esp_idf_svc::hal::gpio::Gpio2, esp_idf_svc::hal::gpio::Output>,
-    pin_d: &mut PinDriver<'_, esp_idf_svc::hal::gpio::Gpio3, esp_idf_svc::hal::gpio::Output>,
-    lamp0: &mut PinDriver<'_, esp_idf_svc::hal::gpio::Gpio4, esp_idf_svc::hal::gpio::Output>,
-    lamp1: &mut PinDriver<'_, esp_idf_svc::hal::gpio::Gpio5, esp_idf_svc::hal::gpio::Output>,
-    lamp2: &mut PinDriver<'_, esp_idf_svc::hal::gpio::Gpio6, esp_idf_svc::hal::gpio::Output>,
-    lamp3: &mut PinDriver<'_, esp_idf_svc::hal::gpio::Gpio7, esp_idf_svc::hal::gpio::Output>,
-) -> Result<(), EspError> {
-    for (i, &digit) in digits.iter().enumerate() {
-        set_all_lamps(Level::Low, lamp0, lamp1, lamp2, lamp3)?;
-        busy_delay_us(500);
+fn maybe_update_state(last_update: &mut u64, digits: &mut [u8; 4]) {
+    let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
+    let seconds = now.as_secs();
 
-        display_digit(pin_a, pin_b, pin_c, pin_d, digit)?;
+    if seconds != *last_update {
+        let timezone_shift = 3 * 60;
+        let total_minutes = seconds / 60 + timezone_shift;
+        let hours = (total_minutes / 60) % 24;
+        let minutes = total_minutes % 60;
 
-        select_lamp(i, lamp0, lamp1, lamp2, lamp3)?;
-        busy_delay_us(1000);
+        *digits = [
+            (hours / 10) as u8,
+            (hours % 10) as u8,
+            (minutes / 10) as u8,
+            (minutes % 10) as u8,
+        ];
+
+        *last_update = seconds;
     }
-
-    FreeRtos::delay_ms(1);
-    Ok(())
 }
 
 fn set_all_lamps(
@@ -116,6 +94,7 @@ fn set_all_lamps(
     lamp1.set_level(level)?;
     lamp2.set_level(level)?;
     lamp3.set_level(level)?;
+
     Ok(())
 }
 

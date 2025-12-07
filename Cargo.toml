@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Sergey Zubkov <ksevelyar@protonmail.com>"]
 edition = "2021"
 resolver = "2"
-rust-version = "1.77"
+rust-version = "1.85"
 
 [[bin]]
 name = "nixie-clock"
@@ -26,8 +26,6 @@ experimental = ["esp-idf-svc/experimental"]
 log = "0.4"
 esp-idf-svc = { version = "0.50", features = ["critical-section", "embassy-time-driver", "embassy-sync"] }
 anyhow = "1.0"
-toml-cfg = "0.1"
-chrono = "0.4"
 
 [build-dependencies]
 embuild = "0.33"

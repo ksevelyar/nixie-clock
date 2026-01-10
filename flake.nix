@@ -24,7 +24,7 @@
         };
       in {
         devShell =
-          pkgs.mkShell rec
+          pkgs.mkShell
           {
             LIBCLANG_PATH = "${pkgs.llvmPackages.libclang.lib}/lib";
             buildInputs = with pkgs; [
@@ -37,9 +37,8 @@
               cargo-generate
               ldproxy
               espup
-              espflash
               python3
-              cargo-espflash
+              espflash
               cmake
 
               minicom
@@ -47,7 +46,6 @@
               esp-idf-esp32c3
             ];
 
-            LD_LIBRARY_PATH = "${pkgs.lib.makeLibraryPath buildInputs}";
             SSID = "ssid";
             PASS = "pass";
           };

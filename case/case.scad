@@ -61,8 +61,8 @@ module type_c_cutout() {
 }
 
 module enclosure() {
-  translate([(enclosure_width + wall * 2) / 2 - tube_diameter / 2 - wall - 0.2, wall, 0.1]) cube([2, enclosure_length, 3.6]);
-  translate([(enclosure_width - wall / 2) / 2 + tube_diameter / 2 + wall + 0.2, wall, 0.1]) cube([2, enclosure_length, 3.6]);
+  translate([(enclosure_width + wall * 2) / 2 - tube_diameter / 2 - wall - 0.2, wall, 0.1]) cube([2, enclosure_length, 4.6]);
+  translate([(enclosure_width - wall / 2) / 2 + tube_diameter / 2 + wall + 0.2, wall, 0.1]) cube([2, enclosure_length, 4.6]);
 
   difference() {
     color("#2f2270") rounded_box(
@@ -89,7 +89,7 @@ module enclosure() {
 module regulator() {
   difference() {
 
-    cube([regulator_width + wall * 2, regulator_length + wall * 2, board_leg_height-wall]);
+    cube([regulator_width + wall * 2, regulator_length + wall * 2, board_leg_height - wall]);
     translate([-wall, 0, -wall]) cube([regulator_width * 2, regulator_length + wall, 20]);
 
     translate([(regulator_width - tube_diameter) / 2 + wall - 0.2, 13, -1]) cube([tube_diameter - 0.1, tube_diameter, 18]);

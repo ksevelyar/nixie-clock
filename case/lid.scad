@@ -27,17 +27,17 @@ module lid() {
 
     union() {
       translate([wall, wall, 0]) {
-        translate([3, 3, 0]) color("#b1a531") cutout(enclosure_leg_height);
-        translate([enclosure_width - 3, 3, 0]) color("#b1a531") cutout(enclosure_leg_height);
-        translate([enclosure_width - 3, enclosure_length - 3, 0]) color("#b1a531") cutout(enclosure_leg_height);
-        translate([3, enclosure_length - 3, 0]) color("#b1a531") cutout(enclosure_leg_height);
+        translate([leg_padding, leg_padding, 0]) color("#b1a531") cutout(enclosure_leg_height);
+        translate([enclosure_width - leg_padding, leg_padding, 0]) color("#b1a531") cutout(enclosure_leg_height);
+        translate([enclosure_width - leg_padding, enclosure_length - leg_padding, 0]) color("#b1a531") cutout(enclosure_leg_height);
+        translate([leg_padding, enclosure_length - leg_padding, 0]) color("#b1a531") cutout(enclosure_leg_height);
       }
 
       translate([wall, wall, wall + 3 - 2]) {
-        translate([3, 3, 0]) color("#b1a531") leg(enclosure_leg_height);
-        translate([enclosure_width - 3, 3, 0]) color("#b1a531") leg(enclosure_leg_height);
-        translate([enclosure_width - 3, enclosure_length - 3, 0]) color("#b1a531") leg(enclosure_leg_height);
-        translate([3, enclosure_length - 3, 0]) color("#b1a531") leg(enclosure_leg_height);
+        translate([leg_padding, leg_padding, 0]) color("#b1a531") leg(enclosure_leg_height);
+        translate([enclosure_width - leg_padding, leg_padding, 0]) color("#b1a531") leg(enclosure_leg_height);
+        translate([enclosure_width - leg_padding, enclosure_length - leg_padding, 0]) color("#b1a531") leg(enclosure_leg_height);
+        translate([leg_padding, enclosure_length - leg_padding, 0]) color("#b1a531") leg(enclosure_leg_height);
       }
     }
   }

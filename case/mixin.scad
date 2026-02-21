@@ -1,8 +1,8 @@
-corner_radius = 8;
 lid_height = 3;
 m3 = 3.12;
 socket_diameter = 25;
 tube_diameter = 16.4;
+corner_radius = 12;
 wall = 2;
 
 board_length = 100;
@@ -16,9 +16,8 @@ regulator_leg_height = 3;
 enclosure_width = board_width + 0.5;
 enclosure_length = 162;
 enclosure_leg_height = 18 + wall;
+leg_padding = corner_radius / 2 + 1;
 enclosure_height = enclosure_leg_height;
-
-leg_padding = corner_radius/2+0.4;
 
 module rounded_box(size = [10, 10, 5], r) {
   translate([size[0] / 2, size[1] / 2, 0]) {

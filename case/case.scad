@@ -1,6 +1,6 @@
 include <mixin.scad>
 
-$fn = 64;
+$fn = 128;
 
 module board() {
   color("#8ec5ff") {

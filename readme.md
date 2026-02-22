@@ -9,17 +9,22 @@
 
 ## How it works
 - On boot, connects to Wi‑Fi and starts SNTP.
-- The main loop reads UNIX time, formats HH:MM (24‑hour), and multiplexes four digits.
+- The main loop reads UNIX time, formats HH:MM, and multiplexes four digits.
 - GPIO 0–3 carry BCD; GPIO 4–7 select the active digit (one high at a time).
-- ~2 ms per digit yields a steady, flicker‑free display.
+- ~2 ms per digit yields flicker‑free display.
 
 ### BCD
 ```
-0 → 0000   5 → 0101
-1 → 0001   6 → 0110
-2 → 0010   7 → 0111
-3 → 0011   8 → 1000
-4 → 0100   9 → 1001
+0 → 0000
+1 → 0001
+2 → 0010
+3 → 0011
+4 → 0100
+5 → 0101
+6 → 0110
+7 → 0111
+8 → 1000
+9 → 1001
 ```
 
 ## Hardware
@@ -31,11 +36,10 @@
 [![PCB](./doc/pcb.png)](./doc/pcb.png?raw=1)
 
 ### Pinout
-| GPIO | Function | Notes |
-| ---- | -------- | ----- |
-| 8 | Built‑in LED | lights on successful Wi‑Fi connection |
-| 0–3 | BCD A–D | encodes current digit |
-| 4–7 | Digit selects 1–4 | selects active digit |
+| GPIO | Function |
+| ---- | -------- |
+| 0–3 | encodes current digit |
+| 4–7 | selects active digit |
 
 ## Build & Flash
 

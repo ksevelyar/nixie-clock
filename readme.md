@@ -35,12 +35,6 @@
 ### PCB
 [![PCB](./doc/pcb.png)](./doc/pcb.png?raw=1)
 
-### Pinout
-| GPIO | Function |
-| ---- | -------- |
-| 0–3 | encodes current digit |
-| 4–7 | selects active digit |
-
 ## Build & Flash
 
 ```fish

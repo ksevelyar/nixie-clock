@@ -1,5 +1,7 @@
 # Nixie Clock [![Continuous Integration](https://github.com/ksevelyar/nixie-clock/actions/workflows/rust_ci.yml/badge.svg)](https://github.com/ksevelyar/nixie-clock/actions/workflows/rust_ci.yml)
 
+[![Schematic](./doc/photo.jpg)](./doc/photo.jpg)
+
 ## Features
 - Keeps time in sync via SNTP over Wi‑Fi
 - Socketed tubes for quick replacement

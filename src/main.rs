@@ -22,9 +22,6 @@ fn main() -> Result<(), EspError> {
     let _nvs = EspDefaultNvsPartition::take()?;
 
     let _wifi = wifi_create(SSID, PASSWORD, peripherals.modem, sysloop)?;
-    // TODO: light led on error
-    // let mut builtin_led = PinDriver::output(peripherals.pins.gpio8)?;
-    // builtin_led.set_low()?;
 
     let _sntp = sntp::EspSntp::new_default()?;
     info!("SNTP initialized");

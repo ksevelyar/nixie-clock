@@ -1,6 +1,7 @@
 # Nixie Clock [![Continuous Integration](https://github.com/ksevelyar/nixie-clock/actions/workflows/rust_ci.yml/badge.svg)](https://github.com/ksevelyar/nixie-clock/actions/workflows/rust_ci.yml)
 
-[![photo](./doc/photo.jpg)](./doc/photo.jpg)
+[![photo-1](./doc/photo-1.jpg)](./doc/photo-1.jpg)
+[![photo-2](./doc/photo-2.jpg)](./doc/photo-2.jpg)
 
 ## Features
 - Keeps time in sync via SNTP over Wi‑Fi

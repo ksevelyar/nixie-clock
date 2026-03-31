@@ -1,6 +1,6 @@
 # Nixie Clock [![Continuous Integration](https://github.com/ksevelyar/nixie-clock/actions/workflows/rust_ci.yml/badge.svg)](https://github.com/ksevelyar/nixie-clock/actions/workflows/rust_ci.yml)
 
-[![Schematic](./doc/photo.jpg)](./doc/photo.jpg)
+[![photo](./doc/photo.jpg)](./doc/photo.jpg)
 
 ## Features
 - Keeps time in sync via SNTP over Wi‑Fi
@@ -42,5 +42,33 @@
 ```fish
 nix develop
 
-SSID="WiFi" PASS="Password" cargo run --release
+SSID="WiFi" PASS="Password" UTC_OFFSET=180 cargo run --release
+```
+```
+   Compiling nixie-clock v0.2.0 (/home/ksevelyar/code/nixie-clock)
+    Finished `release` profile [optimized] target(s) in 0.67s
+     Running `espflash flash --monitor target/riscv32imc-esp-espidf/release/nixie-clock`
+[2026-03-31T20:32:43Z INFO ] Serial port: '/dev/ttyACM0'
+[2026-03-31T20:32:43Z INFO ] Connecting...
+[2026-03-31T20:32:43Z INFO ] Using flash stub
+Chip type:         esp32c3 (revision v0.4)
+Crystal frequency: 40 MHz
+Flash size:        4MB
+Features:          WiFi, BLE
+MAC address:       60:55:f9:af:93:2c
+App/part. size:    1,021,520/4,128,768 bytes, 24.74%
+[2026-03-31T20:32:43Z INFO ] Segment at address '0x0' has not changed, skipping write
+[2026-03-31T20:32:43Z INFO ] Segment at address '0x8000' has not changed, skipping write
+[00:00:12] [========================================]     599/599     0x10000                           [2026-03-31T20:32:57Z INFO ] Flashing has completed!
+Commands:
+    CTRL+R    Reset chip
+    CTRL+C    Exit
+
+...
+
+I (4346) nixie_clock: Wifi DHCP info: IpInfo { ip: 192.168.1.114, subnet: Subnet { gateway: 192.168.1.1, mask: Mask(24) }, dns: Some(192.168.1.1), secondary_dns: Some(0.0.0.0) }
+
+...
+
+I (4366) nixie_clock: SNTP initialized
 ```

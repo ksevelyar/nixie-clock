@@ -48,6 +48,7 @@
 
             SSID = "ssid";
             PASS = "pass";
+            UTC_OFFSET = "180";
           };
       }
     );

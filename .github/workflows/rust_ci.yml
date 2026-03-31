@@ -43,3 +43,4 @@ jobs:
         env:
           SSID: ${{ secrets.SSID }}
           PASS: ${{ secrets.PASS }}
+          UTC_OFFSET: 180

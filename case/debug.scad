@@ -1,6 +1,7 @@
 include <mixin.scad>
 
 $fn = 64;
+wall = 1;
 
 module board() {
   translate([4, 4, 0]) color("#b1a531") leg(board_leg_height);
@@ -41,8 +42,8 @@ module type_c_cutout() {
 }
 
 module test() {
-  enclosure_height = 4;
-  enclosure_leg_height = 8;
+  enclosure_height = 20 - wall;
+  enclosure_leg_height = 20 - wall;
 
   difference() {
     color("#2f2270") rounded_box(
@@ -61,10 +62,9 @@ module test() {
   enclosure_length = 30 - wall * 2;
 
   translate([wall, wall, 0.1]) {
-    translate([3, 3, 0]) color("#b1a531") leg(enclosure_leg_height);
     translate([enclosure_width - 3, 3, 0]) color("#b1a531") leg(enclosure_leg_height);
-    translate([enclosure_width - 3, enclosure_length - 3, 0]) color("#b1a531") leg(enclosure_leg_height);
     translate([3, enclosure_length - 3, 0]) color("#b1a531") leg(enclosure_leg_height);
   }
 }
+
 test();

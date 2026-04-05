@@ -73,3 +73,10 @@ I (4346) nixie_clock: Wifi DHCP info: IpInfo { ip: 192.168.1.114, subnet: Subnet
 
 I (4366) nixie_clock: SNTP initialized
 ```
+
+## Update deps
+The simplest way is to regenerate a dummy project and copy the dependencies from it:
+
+```
+cargo generate esp-rs/esp-idf-template cargo
+```

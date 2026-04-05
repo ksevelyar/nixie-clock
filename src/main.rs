@@ -1,10 +1,11 @@
+use esp_idf_svc::eventloop::EspSystemEventLoop;
 use esp_idf_svc::hal::delay::{Ets, FreeRtos};
-use esp_idf_svc::hal::gpio::{AnyOutputPin, Level, Output, OutputPin, PinDriver};
-use esp_idf_svc::hal::prelude::Peripherals;
+use esp_idf_svc::hal::gpio::{Level, Output, PinDriver};
+use esp_idf_svc::hal::peripherals::Peripherals;
 use esp_idf_svc::nvs::*;
 use esp_idf_svc::sntp;
 use esp_idf_svc::sys::EspError;
-use esp_idf_svc::{eventloop::EspSystemEventLoop, hal::peripheral};
+use esp_idf_svc::wifi::{BlockingWifi, ClientConfiguration, Configuration, EspWifi};
 use log::info;
 use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -29,17 +30,17 @@ fn main() -> Result<(), EspError> {
     info!("SNTP initialized");
 
     let mut tube_value = [
-        PinDriver::output(peripherals.pins.gpio0.downgrade_output())?,
-        PinDriver::output(peripherals.pins.gpio1.downgrade_output())?,
-        PinDriver::output(peripherals.pins.gpio2.downgrade_output())?,
-        PinDriver::output(peripherals.pins.gpio3.downgrade_output())?,
+        PinDriver::output(peripherals.pins.gpio0.degrade_output())?,
+        PinDriver::output(peripherals.pins.gpio1.degrade_output())?,
+        PinDriver::output(peripherals.pins.gpio2.degrade_output())?,
+        PinDriver::output(peripherals.pins.gpio3.degrade_output())?,
     ];
 
     let mut tubes = [
-        PinDriver::output(peripherals.pins.gpio7.downgrade_output())?,
-        PinDriver::output(peripherals.pins.gpio6.downgrade_output())?,
-        PinDriver::output(peripherals.pins.gpio5.downgrade_output())?,
-        PinDriver::output(peripherals.pins.gpio4.downgrade_output())?,
+        PinDriver::output(peripherals.pins.gpio7.degrade_output())?,
+        PinDriver::output(peripherals.pins.gpio6.degrade_output())?,
+        PinDriver::output(peripherals.pins.gpio5.degrade_output())?,
+        PinDriver::output(peripherals.pins.gpio4.degrade_output())?,
     ];
 
     let mut digits = [0u8; 4];
@@ -79,27 +80,21 @@ fn maybe_update_state(utc_offset: i32, last_update: &mut u64, digits: &mut [u8; 
     *last_update = seconds;
 }
 
-fn set_all_tubes_low(pins: &mut [PinDriver<'_, AnyOutputPin, Output>]) -> Result<(), EspError> {
+fn set_all_tubes_low(pins: &mut [PinDriver<'_, Output>]) -> Result<(), EspError> {
     for pin in pins.iter_mut() {
         pin.set_level(Level::Low)?;
     }
     Ok(())
 }
 
-fn select_tube(
-    idx: usize,
-    pins: &mut [PinDriver<'_, AnyOutputPin, Output>],
-) -> Result<(), EspError> {
+fn select_tube(idx: usize, pins: &mut [PinDriver<'_, Output>]) -> Result<(), EspError> {
     for (i, pin) in pins.iter_mut().enumerate() {
         pin.set_level(if i == idx { Level::High } else { Level::Low })?;
     }
     Ok(())
 }
 
-fn set_tube_value(
-    tube_value: &mut [PinDriver<'_, AnyOutputPin, Output>],
-    digit: u8,
-) -> Result<(), EspError> {
+fn set_tube_value(tube_value: &mut [PinDriver<'_, Output>], digit: u8) -> Result<(), EspError> {
     for (i, pin) in tube_value.iter_mut().enumerate() {
         let bit_set = (digit >> i) & 1 != 0;
         pin.set_level(if bit_set { Level::High } else { Level::Low })?;
@@ -110,10 +105,9 @@ fn set_tube_value(
 fn wifi_create(
     ssid: &str,
     pass: &str,
-    modem: impl peripheral::Peripheral<P = esp_idf_svc::hal::modem::Modem> + 'static,
+    modem: esp_idf_svc::hal::modem::Modem<'static>,
     sysloop: EspSystemEventLoop,
-) -> Result<esp_idf_svc::wifi::EspWifi<'static>, EspError> {
-    use esp_idf_svc::wifi::*;
+) -> Result<EspWifi<'static>, EspError> {
     let mut esp_wifi = EspWifi::new(modem, sysloop.clone(), None)?;
     let mut wifi = BlockingWifi::wrap(&mut esp_wifi, sysloop.clone())?;
     wifi.set_configuration(&Configuration::Client(ClientConfiguration {

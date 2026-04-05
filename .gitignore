@@ -1,10 +1,4 @@
-# compiled files and executables
-.embuild
-debug/
-target/
-.direnv
-
-
-# Added by cargo
-
+/.embuild
 /target
+/.direnv
+result

@@ -1,10 +1,10 @@
 [package]
 name = "nixie-clock"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Sergey Zubkov <ksevelyar@protonmail.com>"]
-edition = "2021"
+edition = "2024"
 resolver = "2"
-rust-version = "1.85"
+rust-version = "1.96"
 
 [[bin]]
 name = "nixie-clock"
@@ -17,15 +17,11 @@ opt-level = "s"
 debug = true    # Symbols are nice and they don't increase the size on Flash
 opt-level = "z"
 
-[features]
-default = []
-
-experimental = ["esp-idf-svc/experimental"]
-
 [dependencies]
 log = "0.4"
-esp-idf-svc = { version = "0.50", features = ["critical-section", "embassy-time-driver", "embassy-sync"] }
+esp-idf-svc = { version = "0.52.1", features = ["critical-section", "embassy-time-driver", "embassy-sync"] }
+embassy-time = { version = "0.5", features = ["generic-queue-8"] }
 anyhow = "1.0"
 
 [build-dependencies]
-embuild = "0.33"
+embuild = "0.33.1"
